@@ -1,11 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.Configuration;
 using CodeChallenge.Data;
 using CodeChallenge.Entities;
+using CodeChallenge.Models.Request;
 using CodeChallenge.Models.Response;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CodeChallenge.Services
 {
@@ -15,7 +22,7 @@ namespace CodeChallenge.Services
         UserManager<ApplicationUser> _userManager;
         SignInManager<ApplicationUser> _signInManager;
         RoleManager<IdentityRole> _roleManager;
-        IConfiguration Configuration { get; }
+        IConfiguration _configuration;
         IMapper _mapper;
 
         public UserService
@@ -32,7 +39,7 @@ namespace CodeChallenge.Services
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            Configuration = configuration;
+            _configuration = configuration;
             _mapper = mapper;
         }
         public async Task<ServiceResponse> Register(ApplicationUser User, string Password, string Role)
@@ -63,6 +70,82 @@ namespace CodeChallenge.Services
             user.SecurityStamp = null;
             user.ConcurrencyStamp = null;
             return new ServiceResponse { status = true, data = user };
+        }
+
+        public async Task<ServiceResponse> GenerateToken(AuthenticationRequestModel model)
+        {
+            try
+            {
+                ApplicationUser User = _dbContext.ApplicationUsers.FirstOrDefault(x => x.Email.ToLower() == model.Email.ToLower());
+
+                if (User == null)
+                {
+                    return new ServiceResponse { status = false, response = "User does not exist" };
+                }
+
+
+                var status = await _userManager.CheckPasswordAsync(User, model.Password);
+
+                if (!status)
+                {
+                    return new ServiceResponse { status = false, response = "Incorrect password supplied" };
+                }
+
+                return await CreateAccessToken(User);
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse { status = false, response = ex.Message };
+            }
+        }
+
+        public async Task<ServiceResponse> CreateAccessToken(ApplicationUser User)
+        {
+            try
+            {
+                DateTime now = DateTime.UtcNow;
+                List<string> role = (List<string>)await _userManager.GetRolesAsync(User);
+
+                var claims = new[] {
+                    new Claim (JwtRegisteredClaimNames.Sub, User.Id),
+                    new Claim (ClaimTypes.NameIdentifier, User.Id),
+                    new Claim (ClaimTypes.Role, role.FirstOrDefault ()),
+                    new Claim (ClaimTypes.AuthorizationDecision, role.FirstOrDefault ()),
+                    new Claim (JwtRegisteredClaimNames.Jti, Guid.NewGuid ().ToString ()),
+                    new Claim (JwtRegisteredClaimNames.Iat, new DateTimeOffset (now).ToUnixTimeSeconds ().ToString ())
+                };
+
+                int tokenExpiration = _configuration.GetValue<int>("Auth:Jwt:TokenExpiration");
+                var IsserSignKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Auth:Jwt:Key"]));
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["Auth:Jwt:Issuer"],
+                    audience: _configuration["Auth:Jwt:Audience"],
+                    claims: claims,
+                    notBefore: now,
+                    expires: now.Add(TimeSpan.FromHours(tokenExpiration)),
+                    signingCredentials: new SigningCredentials(IsserSignKey, SecurityAlgorithms.HmacSha256)
+                );
+
+                var encodeToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+                var response = new AuthenticateUserResponseModel()
+                {
+                    Id = User.Id,
+                    Token = encodeToken,
+                    FirstName = User.FirstName,
+                    LastName = User.LastName,
+                    Role = role.FirstOrDefault(),
+                    DateCreated = User.DateCreated,
+                    Email = User.Email
+                };
+
+                return new ServiceResponse { data = response, status = true };
+            }
+            catch
+            {
+                return new ServiceResponse { response = "Token generation failed", status = false };
+            }
         }
     }
 }

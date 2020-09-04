@@ -37,10 +37,38 @@ namespace CodeChallenge.Controllers
             _roleManager = roleManager;
             _mapper = mapper;
         }
+
+        /// <summary>
+        /// User authentication with email and password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("auth")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticateUserResponseModel>), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> Login([FromBody] AuthenticationRequestModel model)
+        {
+            var resp = await _userService.GenerateToken(model);
+            if (resp.status)
+            {
+                // _logger.LogInformation("User Successfully authenticated");
+                return Ok(new ApiResponse
+                {
+                    message = "Authentication Successful",
+                    data = resp.data
+                });
+            }
+            // _logger.LogWarning("User authentication failed");
+            return BadRequest(new ApiResponse
+            {
+                message = resp.response
+            });
+        }
         /// <summary>
         /// Register Customer
         /// </summary>
-        [HttpPost("government")]
+        [HttpPost("customer")]
         [ProducesResponseType(typeof(ApiResponse<ApplicationUser>), 200)]
         [ProducesResponseType(typeof(ApiResponse), 400)]
         [AllowAnonymous]
@@ -76,7 +104,7 @@ namespace CodeChallenge.Controllers
 
         }
 
-        
+
 
         [HttpPost("like")]
         public IActionResult Like()

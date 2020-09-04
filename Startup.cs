@@ -36,24 +36,28 @@ namespace CodeChallenge
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddDbContext<ApplicationDbContext> (options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
             options.UseInMemoryDatabase("blogDb"));
-            services.AddIdentity<ApplicationUser, IdentityRole> (options => {
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
                 options.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-            services.AddAuthentication (options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(config => {
+            .AddJwtBearer(config =>
+            {
                 config.RequireHttpsMetadata = false;
                 config.SaveToken = true;
-                config.TokenValidationParameters = new TokenValidationParameters() {
+                config.TokenValidationParameters = new TokenValidationParameters()
+                {
                     ValidIssuer = Configuration["Auth:Jwt:Issuer"],
                     ValidAudience = Configuration["Auth:Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey (Encoding.UTF8.GetBytes (Configuration["Auth:Jwt:Key"])),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Auth:Jwt:Key"])),
                     ClockSkew = TimeSpan.Zero,
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -61,14 +65,16 @@ namespace CodeChallenge
                     ValidateIssuerSigningKey = true
                 };
             });
-            services.AddAuthentication (AuthOptions => {});
-            services.AddAutoMapper (typeof (AutomapperProfile));
-            services.AddSwaggerGen (s => {
-                s.SwaggerDoc ("v1", new OpenApiInfo {
+            services.AddAuthentication(AuthOptions => { });
+            services.AddAutoMapper(typeof(AutomapperProfile));
+            services.AddSwaggerGen(s =>
+            {
+                s.SwaggerDoc("v1", new OpenApiInfo
+                {
                     Version = "v1",
                     Title = "Rock Content Challenge",
                     Description = "Like Button Feature API Doc",
-                });   
+                });
             });
         }
 
@@ -80,9 +86,10 @@ namespace CodeChallenge
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseSwagger ();
-            app.UseSwaggerUI (c => {
-                c.SwaggerEndpoint ("/swagger/v1/swagger.json", "CodeChallenge API V1");
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeChallenge API V1");
 
             });
             app.UseHttpsRedirection();
