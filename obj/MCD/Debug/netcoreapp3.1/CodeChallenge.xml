@@ -11,6 +11,13 @@
             <param name="model"></param>
             <returns></returns>
         </member>
+        <member name="M:CodeChallenge.Controllers.PostController.Like(CodeChallenge.Models.Request.LikeRequestModel)">
+            <summary>
+            Like Blog Post
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="M:CodeChallenge.Controllers.UsersController.Login(CodeChallenge.Models.Request.AuthenticationRequestModel)">
             <summary>
             User authentication with email and password

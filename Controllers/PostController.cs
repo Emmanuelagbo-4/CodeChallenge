@@ -61,11 +61,25 @@ namespace CodeChallenge.Controllers
             return BadRequest (new ApiResponse {message = "Post creation failed"});
         }
         
+         /// <summary>
+        /// Like Blog Post
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("like")]
-        public IActionResult Like()
+        [Authorize(Roles = Roles.Customer)]
+        [ProducesResponseType(typeof(ApiResponse<LikeRequestModel>), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public IActionResult Like([FromBody] LikeRequestModel model)
         {
-            
-            return Ok("Tested Endpoint for Like");
+            ApplicationUser user  = _userManager.FindByIdAsync (User.FindFirst (ClaimTypes.NameIdentifier)?.Value).Result;
+            var LikeModel = _mapper.Map<Like>(model);
+            var response = _postService.LikePost(LikeModel);
+           
+            if(response.status){
+                    return Ok(new ApiResponse {message = "Liked Post successfully", data = response.data});
+                }
+            return BadRequest (new ApiResponse {message = "Like failed"});
         }
     }
 }

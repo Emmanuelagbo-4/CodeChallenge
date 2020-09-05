@@ -9,7 +9,6 @@ namespace CodeChallenge.Entities
         public Post()
         {
             DateCreated = DateTime.Now;
-            LikeCount = 0;
         }
         [Key]
         [DatabaseGenerated (DatabaseGeneratedOption.Identity)]

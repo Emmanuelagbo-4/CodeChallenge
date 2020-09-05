@@ -10,6 +10,7 @@ namespace CodeChallenge.Helper
         {
             CreateMap<ApplicationUser, UserRegistrationRequestModel>().ReverseMap();
             CreateMap<Post, CreateBlogPostRequestModel>().ReverseMap();
+            CreateMap<Like, LikeRequestModel>().ReverseMap();
         }
     }
 }

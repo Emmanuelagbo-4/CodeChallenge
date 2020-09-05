@@ -49,5 +49,24 @@ namespace CodeChallenge.Services
             user.ConcurrencyStamp = null;
             return new ServiceResponse { status = true, data = user };
         }
+
+        public ServiceResponse LikePost(Like model)
+        {
+            var Post = _dbContext.Posts.Where(x => x.Id == model.PostId).FirstOrDefault();
+            Post.LikeCount ++;
+            Post.ApplicationUser.PasswordHash = null;
+            Post.ApplicationUser.SecurityStamp = null;
+            Post.ApplicationUser.ConcurrencyStamp = null;
+            var result = _dbContext.Likes.Add(model);
+            int count = _dbContext.SaveChanges();
+
+            if (count > 0)
+            {
+                return new ServiceResponse { status = true, data = result.Entity };
+            }
+            return new ServiceResponse {status = false, response = "Liked Post Succesfully"}; 
+
+           
+        }
     }
 }
