@@ -9,6 +9,7 @@ namespace CodeChallenge.Helper
         public AutomapperProfile()
         {
             CreateMap<ApplicationUser, UserRegistrationRequestModel>().ReverseMap();
+            CreateMap<Post, CreateBlogPostRequestModel>().ReverseMap();
         }
     }
 }

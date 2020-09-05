@@ -142,10 +142,13 @@ namespace CodeChallenge.Services
 
                 return new ServiceResponse { data = response, status = true };
             }
-            catch
+
+            catch (Exception ex)
             {
-                return new ServiceResponse { response = "Token generation failed", status = false };
+                return new ServiceResponse { response = "Token generation failed",data = ex, status = false };
             }
+           
+            
         }
     }
 }

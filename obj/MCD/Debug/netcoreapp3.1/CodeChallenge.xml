@@ -4,6 +4,13 @@
         <name>CodeChallenge</name>
     </assembly>
     <members>
+        <member name="M:CodeChallenge.Controllers.PostController.Create(CodeChallenge.Models.Request.CreateBlogPostRequestModel)">
+            <summary>
+            Create Blog Post
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="M:CodeChallenge.Controllers.UsersController.Login(CodeChallenge.Models.Request.AuthenticationRequestModel)">
             <summary>
             User authentication with email and password
@@ -16,7 +23,7 @@
             Register Customer
             </summary>
         </member>
-        <member name="M:CodeChallenge.Controllers.UsersController.RegisterAdmin(CodeChallenge.Models.Request.UserRegistrationRequestModel)">
+        <member name="M:CodeChallenge.Controllers.UsersController.CreateAdmin(CodeChallenge.Models.Request.UserRegistrationRequestModel)">
             <summary>
             Register Admin
             </summary>

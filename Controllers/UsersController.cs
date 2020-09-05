@@ -49,20 +49,20 @@ namespace CodeChallenge.Controllers
         [ProducesResponseType(typeof(ApiResponse), 400)]
         public async Task<IActionResult> Login([FromBody] AuthenticationRequestModel model)
         {
-            var resp = await _userService.GenerateToken(model);
-            if (resp.status)
+            var response = await _userService.GenerateToken(model);
+            if (response.status)
             {
                 // _logger.LogInformation("User Successfully authenticated");
                 return Ok(new ApiResponse
                 {
                     message = "Authentication Successful",
-                    data = resp.data
+                    data = response.data
                 });
             }
             // _logger.LogWarning("User authentication failed");
             return BadRequest(new ApiResponse
             {
-                message = resp.response
+                message = response.response
             });
         }
         /// <summary>
@@ -103,7 +103,7 @@ namespace CodeChallenge.Controllers
             }
 
         }
-          /// <summary>
+        /// <summary>
         /// Register Admin
         /// </summary>
         [HttpPost("admin")]
@@ -142,10 +142,6 @@ namespace CodeChallenge.Controllers
 
         }
 
-        [HttpPost("like")]
-        public IActionResult Like()
-        {
-            return Ok("Tested Endpoint for Like");
-        }
+       
     }
 }

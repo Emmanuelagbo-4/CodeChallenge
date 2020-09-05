@@ -53,25 +53,28 @@ namespace CodeChallenge
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
             })
-            .AddJwtBearer(config =>
-            {
-                config.RequireHttpsMetadata = false;
-                config.SaveToken = true;
-                config.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidIssuer = Configuration["Auth:Jwt:Issuer"],
-                    ValidAudience = Configuration["Auth:Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Auth:Jwt:Key"])),
-                    ClockSkew = TimeSpan.Zero,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    RequireExpirationTime = true,
-                    ValidateIssuerSigningKey = true
-                };
-            });
+                 .AddJwtBearer(config =>
+                 {
+                     config.RequireHttpsMetadata = false;
+                     config.SaveToken = true;
+                     config.TokenValidationParameters = new TokenValidationParameters()
+                     {
+                         ValidIssuer = Configuration["Auth:Jwt:Issuer"],
+                         ValidAudience = Configuration["Auth:Jwt:Audience"],
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Auth:Jwt:Key"])),
+                         ClockSkew = TimeSpan.Zero,
+
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         RequireExpirationTime = true,
+                         ValidateIssuerSigningKey = true
+                     };
+                 });
             services.AddAuthentication(AuthOptions => { });
             services.AddScoped<UserService>();
+            services.AddScoped<PostService>();
             services.AddAutoMapper(typeof(AutomapperProfile));
             services.AddSwaggerGen(s =>
             {
@@ -103,7 +106,7 @@ namespace CodeChallenge
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseStaticFiles();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
