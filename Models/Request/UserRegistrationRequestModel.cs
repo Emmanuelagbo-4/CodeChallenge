@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CodeChallenge.Models.Request
 {
-    public class CustomerRegistrationRequestModel
+    public class UserRegistrationRequestModel
     {
         [Required]
         public string FirstName {get; set;}

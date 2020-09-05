@@ -72,7 +72,7 @@ namespace CodeChallenge.Controllers
         [ProducesResponseType(typeof(ApiResponse<ApplicationUser>), 200)]
         [ProducesResponseType(typeof(ApiResponse), 400)]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterCustomer([FromBody] CustomerRegistrationRequestModel UserDTO)
+        public async Task<IActionResult> RegisterCustomer([FromBody] UserRegistrationRequestModel UserDTO)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace CodeChallenge.Controllers
                 }
 
                 var AppUser = _mapper.Map<ApplicationUser>(UserDTO);
-                var response = await _userService.Register(AppUser, UserDTO.Password, Roles.Customer);
+               var response = await _userService.Register(AppUser, UserDTO.Password, Roles.Customer);
                 if (response.status)
                 {
                     var user = response.data as ApplicationUser;
@@ -103,8 +103,44 @@ namespace CodeChallenge.Controllers
             }
 
         }
+          /// <summary>
+        /// Register Admin
+        /// </summary>
+        [HttpPost("admin")]
+        [ProducesResponseType(typeof(ApiResponse<ApplicationUser>), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> CreateAdmin([FromBody] UserRegistrationRequestModel UserDTO)
+        {
+            try
+            {
+                if ((await _userManager.FindByEmailAsync(UserDTO.Email)) != null)
+                {
+                    return BadRequest(new ApiResponse { message = "User email in existence" });
+                }
 
+                var AppUser = _mapper.Map<ApplicationUser>(UserDTO);
+                var response = await _userService.Register(AppUser, UserDTO.Password, Roles.Admin);
+                if (response.status)
+                {
+                    var user = response.data as ApplicationUser;
+                    return Ok(new ApiResponse
+                    {
+                        message = "Admin Created Successful.",
+                        data = _userService.GetUserDetail(user.Id)
+                    });
+                }
+                return BadRequest(new ApiResponse
+                {
+                    message = response.response as string,
+                });
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new ApiResponse { message = ex.Message });
+            }
 
+        }
 
         [HttpPost("like")]
         public IActionResult Like()

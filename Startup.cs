@@ -7,6 +7,7 @@ using AutoMapper;
 using CodeChallenge.Data;
 using CodeChallenge.Entities;
 using CodeChallenge.Helper;
+using CodeChallenge.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,9 +36,13 @@ namespace CodeChallenge
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddControllers();
             services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseInMemoryDatabase("blogDb"));
+              options.UseSqlServer(
+                  Configuration["ConnectionStrings:DefaultConnection"]
+              )
+           );
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
@@ -66,6 +71,7 @@ namespace CodeChallenge
                 };
             });
             services.AddAuthentication(AuthOptions => { });
+            services.AddScoped<UserService>();
             services.AddAutoMapper(typeof(AutomapperProfile));
             services.AddSwaggerGen(s =>
             {
@@ -79,7 +85,7 @@ namespace CodeChallenge
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -96,13 +102,14 @@ namespace CodeChallenge
 
             app.UseRouting();
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            DataSeederService.DataSeed(serviceProvider, Configuration);
         }
     }
 }
